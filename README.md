@@ -1,3 +1,3 @@
 # Vault Deployment
 
-Vault is deployed to the hub cluster.
+Deploy, initialize, and configure Vault on an OpenShift cluster.
