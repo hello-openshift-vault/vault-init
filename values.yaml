@@ -1,0 +1,37 @@
+vault:
+  global:
+    openshift: true
+
+  ui:
+    enabled: true
+
+  injector:
+    image:
+      repository: "registry.connect.redhat.com/hashicorp/vault-k8s"
+      tag: "0.14.2-ubi"
+
+    agentImage:
+      repository: "registry.connect.redhat.com/hashicorp/vault"
+      tag: "1.9.2-ubi"
+
+  server:
+    dataStorage:
+      enabled: true
+    # TODO: Move to volumes/volumeMounts; extraVolumes is deprecated
+    extraVolumes:
+      - type: configMap
+        name: post-install-script
+    route:
+      enabled: true
+      host: vault.apps.hub.taco.moe
+      tls:
+        termination: edge
+    image:
+      repository: "registry.connect.redhat.com/hashicorp/vault"
+      tag: "1.9.2-ubi"
+    ha:
+      enabled: false
+    postStart:
+      - "/bin/bash"
+      - "-c"
+      - "sleep 5 && cp /vault/userconfig/post-install-script/post-install.sh /tmp && chmod +x /tmp/post-install.sh && /tmp/post-install.sh"
