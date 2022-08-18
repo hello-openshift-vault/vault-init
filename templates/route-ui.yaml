@@ -11,7 +11,7 @@ metadata:
   annotations:
     openshift.io/host.generated: 'true'
 spec:
-  host: vault-console.apps.hub.taco.moe
+  host: vault-console.apps.ocp4-mwn.linuxrevolution.com
   to:
     kind: Service
     name: vault-server-ui

@@ -23,14 +23,17 @@ vault:
         name: post-install-script
     route:
       enabled: true
-      host: vault.apps.hub.taco.moe
+      host: vault.apps.ocp4-mwn.linuxrevolution.com
       tls:
         termination: edge
     image:
       repository: "registry.connect.redhat.com/hashicorp/vault"
       tag: "1.9.2-ubi"
     ha:
-      enabled: false
+      enabled: true
+      replicas: 3
+      raft:
+        enabled: true
     postStart:
       - "/bin/bash"
       - "-c"

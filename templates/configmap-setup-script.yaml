@@ -3,19 +3,20 @@ data:
   post-install.sh: |
     #!/bin/bash
 
-    CLUSTER_NAME=admin
-
     set -e
 
-    # /bin is protected, so I'm downloading executables to /tmp
+    CLUSTER_NAME=admin
+
+    # /bin is protected, so download executables to /tmp
     [[ ! -d /tmp/bin ]] && mkdir /tmp/bin
     export PATH="$PATH:/tmp/bin"
 
     # TODO: Should be able to curl k8s API instead of downloading oc
-    curl -L -o /tmp/bin/oc https://downloads-openshift-console.apps.hub.taco.moe/amd64/linux/oc
+    # TODO: REPLACE URL
+    curl -k -L -o /tmp/bin/oc "https://downloads-openshift-console.apps.ocp4-mwn.linuxrevolution.com/amd64/linux/oc"
     chmod +x /tmp/bin/oc
 
-    curl -L -o /tmp/bin/jq https://github.com/stedolan/jq/releases/latest/download/jq-linux64
+    curl -k -L -o /tmp/bin/jq "https://github.com/stedolan/jq/releases/latest/download/jq-linux64"
     chmod +x /tmp/bin/jq
 
     unseal-vault() {
@@ -29,8 +30,7 @@ data:
       vault operator unseal "$VAULT_UNSEAL_KEY3"
     }
 
-    # Don't attempt to initialize if vault-recovery-keys secret exists.
-    # (since vault is already initialized, it only needs to be unsealed)
+    # Unseal vault if vault-recovery-keys secret exists
     if oc get secrets vault-recovery-keys &> /dev/null; then
         echo 'Vault is already initialized!'
         echo 'Using vault-recovery-key secret to unseal vault...'
@@ -42,16 +42,24 @@ data:
         exit 0
     fi
 
+    if [[ $HOSTNAME != 'vault-server-0' ]] ; then
+        echo "Joining $HOSTNAME to raft"
+        vault operator raft join 'http://vault-server-0.vault-server-internal:8200'
+        echo "$HOSTNAME joined to raft!"
+        sleep 10
+        # Exit with error so that pod restarts until vault-recovery-keys secret
+        # is created after vault-server-0 initialization.
+        echo "Exit code 2: Raft joined, vault-recovery-keys secret not yet present"
+        exit 2
+    fi
+
     echo 'Initializing vault...'
     vault operator init -format=json > /tmp/recovery-keys.json
 
-    echo 'Creating vault-recovery-keys secret...'
-    oc create secret generic vault-recovery-keys --from-file=/tmp/recovery-keys.json
-
-    # TODO: Should probably remove the recovery keys from pod after creating secret
-
     echo 'Unsealing vault...'
     unseal-vault
+
+    echo 'Configuring vault...'
 
     VAULT_ROOT_TOKEN=$(jq -r '.root_token' /tmp/recovery-keys.json)
     vault login - <<< "$VAULT_ROOT_TOKEN"
@@ -64,12 +72,8 @@ data:
         token_reviewer_jwt="$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)" \
         kubernetes_host="https://$KUBERNETES_PORT_443_TCP_ADDR:443" \
         kubernetes_ca_cert="@/var/run/secrets/kubernetes.io/serviceaccount/ca.crt"
-        # issuer=https://kubernetes.default.svc
-        # No clue if the above line is needed
 
-    # echo "Gettting cluster accessor..."
-    # MOUNT_ACCESSOR=$(vault auth list -format=json | jq -r ".\"$CLUSTER_NAME/\".accessor")
-
+    echo "Writing admin policy..."
     vault policy write admin - << EOF
     path "*" {
       capabilities = ["sudo", "create", "read", "update", "delete", "list"]
@@ -80,22 +84,20 @@ data:
     }
     EOF
 
-    # echo "Writing $CLUSTER_NAME-read policy..."
-    # vault policy write "$CLUSTER_NAME-read" - << EOF
-    # path "hub/data/{{ "{{" }}identity.entity.aliases.$MOUNT_ACCESSOR.metadata.service_account_namespace{{ "}}" }}/*" {
-    #    capabilities=["read","list"]
-    # }
-    # EOF
-
-    # echo "Add kv store for cluster..."
-    # vault secrets enable -version=2 -path="$CLUSTER_NAME" kv
-
+    echo "Creating admin role..."
     vault write \
         "auth/$CLUSTER_NAME/role/admin" \
         bound_service_account_names=vault-server \
         bound_service_account_namespaces=vault-server \
         policies=admin
         ttl=60m
+
+    echo "Done configuring vault!"
+
+    echo "Creating vault-recovery-keys secret..."
+    oc create secret generic vault-recovery-keys --from-file=/tmp/recovery-keys.json
+
+    rm /tmp/recovery-keys.json
 
     echo "Done!"
 kind: ConfigMap
