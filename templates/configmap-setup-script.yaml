@@ -5,15 +5,14 @@ data:
 
     set -e
 
-    CLUSTER_NAME=admin
+    CLUSTER_APPS_HOSTNAME="apps.ocp4-mwn.linuxrevolution.com"
 
     # /bin is protected, so download executables to /tmp
     [[ ! -d /tmp/bin ]] && mkdir /tmp/bin
     export PATH="$PATH:/tmp/bin"
 
     # TODO: Should be able to curl k8s API instead of downloading oc
-    # TODO: REPLACE URL
-    curl -k -L -o /tmp/bin/oc "https://downloads-openshift-console.apps.ocp4-mwn.linuxrevolution.com/amd64/linux/oc"
+    curl -k -L -o /tmp/bin/oc "https://downloads-openshift-console.${CLUSTER_APPS_HOSTNAME}/amd64/linux/oc"
     chmod +x /tmp/bin/oc
 
     curl -k -L -o /tmp/bin/jq "https://github.com/stedolan/jq/releases/latest/download/jq-linux64"
@@ -44,7 +43,7 @@ data:
 
     if [[ $HOSTNAME != 'vault-server-0' ]] ; then
         echo "Joining $HOSTNAME to raft"
-        vault operator raft join 'http://vault-server-0.vault-server-internal:8200'
+        vault operator raft join 'http://vault-0.vault-internal:8200'
         echo "$HOSTNAME joined to raft!"
         sleep 10
         # Exit with error so that pod restarts until vault-recovery-keys secret
@@ -58,41 +57,6 @@ data:
 
     echo 'Unsealing vault...'
     unseal-vault
-
-    echo 'Configuring vault...'
-
-    VAULT_ROOT_TOKEN=$(jq -r '.root_token' /tmp/recovery-keys.json)
-    vault login - <<< "$VAULT_ROOT_TOKEN"
-
-    echo "Enabling $CLUSTER_NAME kubernetes engine..."
-    vault auth enable -path="$CLUSTER_NAME" kubernetes
-
-    echo "Authorizing cluster CA..."
-    vault write "auth/$CLUSTER_NAME/config" \
-        token_reviewer_jwt="$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)" \
-        kubernetes_host="https://$KUBERNETES_PORT_443_TCP_ADDR:443" \
-        kubernetes_ca_cert="@/var/run/secrets/kubernetes.io/serviceaccount/ca.crt"
-
-    echo "Writing admin policy..."
-    vault policy write admin - << EOF
-    path "*" {
-      capabilities = ["sudo", "create", "read", "update", "delete", "list"]
-    }
-
-    path "sys/*" {
-      capabilities = ["sudo", "create", "read", "update", "delete", "list"]
-    }
-    EOF
-
-    echo "Creating admin role..."
-    vault write \
-        "auth/$CLUSTER_NAME/role/admin" \
-        bound_service_account_names=vault-server \
-        bound_service_account_namespaces=vault-server \
-        policies=admin
-        ttl=60m
-
-    echo "Done configuring vault!"
 
     echo "Creating vault-recovery-keys secret..."
     oc create secret generic vault-recovery-keys --from-file=/tmp/recovery-keys.json
