@@ -23,7 +23,7 @@ vault:
         name: post-install-script
     route:
       enabled: true
-      host: vault.apps.ocp4-mwn.linuxrevolution.com
+      host: vault.apps.hub.taco.moe
       tls:
         termination: edge
     image:
