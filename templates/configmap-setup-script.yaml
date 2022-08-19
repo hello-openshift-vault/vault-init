@@ -5,14 +5,15 @@ data:
 
     set -e
 
-    CLUSTER_APPS_HOSTNAME="apps.ocp4-mwn.linuxrevolution.com"
+    # Change HELM_DEPLOYMENT_NAME if you deploy under a different name
+    HELM_DEPLOYMENT_NAME='vault'
 
     # /bin is protected, so download executables to /tmp
     [[ ! -d /tmp/bin ]] && mkdir /tmp/bin
     export PATH="$PATH:/tmp/bin"
 
     # TODO: Should be able to curl k8s API instead of downloading oc
-    curl -k -L -o /tmp/bin/oc "https://downloads-openshift-console.${CLUSTER_APPS_HOSTNAME}/amd64/linux/oc"
+    curl -k -L -o /tmp/bin/oc "https://downloads.openshift-console.svc/amd64/linux/oc"
     chmod +x /tmp/bin/oc
 
     curl -k -L -o /tmp/bin/jq "https://github.com/stedolan/jq/releases/latest/download/jq-linux64"
@@ -41,9 +42,9 @@ data:
         exit 0
     fi
 
-    if [[ $HOSTNAME != 'vault-server-0' ]] ; then
+    if [[ "$HOSTNAME" != "${HELM_DEPLOYMENT_NAME}-0" ]] ; then
         echo "Joining $HOSTNAME to raft"
-        vault operator raft join 'http://vault-0.vault-internal:8200'
+        vault operator raft join "http://${HELM_DEPLOYMENT_NAME}-0.${HELM_DEPLOYMENT_NAME}-internal:8200"
         echo "$HOSTNAME joined to raft!"
         sleep 10
         # Exit with error so that pod restarts until vault-recovery-keys secret
