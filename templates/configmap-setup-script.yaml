@@ -6,7 +6,7 @@ data:
     set -e
 
     # Change HELM_DEPLOYMENT_NAME if you deploy under a different name
-    HELM_DEPLOYMENT_NAME='vault'
+    HELM_DEPLOYMENT_NAME='vault-server'
 
     # /bin is protected, so download executables to /tmp
     [[ ! -d /tmp/bin ]] && mkdir /tmp/bin
