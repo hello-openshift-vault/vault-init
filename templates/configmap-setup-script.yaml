@@ -13,7 +13,7 @@ data:
     export PATH="$PATH:/tmp/bin"
 
     # TODO: Should be able to curl k8s API instead of downloading oc
-    curl -k -L -o /tmp/bin/oc "http://downloads.openshift-console.svc/amd64/linux/oc"
+    curl -k -L -o /tmp/bin/oc "http://downloads.openshift-console.svc.cluster.local/amd64/linux/oc"
     chmod +x /tmp/bin/oc
 
     curl -k -L -o /tmp/bin/jq "https://github.com/stedolan/jq/releases/latest/download/jq-linux64"

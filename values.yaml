@@ -37,4 +37,4 @@ vault:
     postStart:
       - "/bin/bash"
       - "-c"
-      - "sleep 5 && cp /vault/userconfig/post-install-script/post-install.sh /tmp && chmod +x /tmp/post-install.sh && /tmp/post-install.sh"
+      - "sleep 10 && cp /vault/userconfig/post-install-script/post-install.sh /tmp && chmod +x /tmp/post-install.sh && /tmp/post-install.sh"
