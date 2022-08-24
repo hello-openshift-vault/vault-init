@@ -30,8 +30,11 @@ vault:
       repository: "registry.connect.redhat.com/hashicorp/vault"
       tag: "1.11.2-ubi"
     ha:
-      enabled: false
+      enabled: true
+      replicas: 3
+      raft:
+        enabled: true
     postStart:
       - "/bin/bash"
       - "-c"
-      - "sleep 5 && cp /vault/userconfig/post-install-script/post-install.sh /tmp && chmod +x /tmp/post-install.sh && /tmp/post-install.sh"
+      - "sleep 10 && cp /vault/userconfig/post-install-script/post-install.sh /tmp && chmod +x /tmp/post-install.sh && /tmp/post-install.sh"
