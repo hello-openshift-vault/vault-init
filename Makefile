@@ -8,10 +8,4 @@ install:
 	    vault-server .
 
 uninstall:
-	helm uninstall \
-	     --namespace vault-server \
-	     vault-server
-	oc delete -n vault-server pvc data-vault-server-0
-	oc delete -n vault-server pvc data-vault-server-1
-	oc delete -n vault-server pvc data-vault-server-2
-	oc delete -n vault-server secret vault-recovery-keys
+	oc delete project vault-server
