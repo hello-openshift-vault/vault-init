@@ -1,6 +1,6 @@
 apiVersion: v1
 data:
-  post-install.sh: |
+  init.sh: |
     #!/bin/bash
 
     set -e
@@ -20,14 +20,14 @@ data:
     chmod +x /tmp/bin/jq
 
     unseal-vault() {
-      # We will need 3/5 keys to unseal each Vault instance
-      VAULT_UNSEAL_KEY1=$(jq -r '.unseal_keys_b64[0]' /tmp/recovery-keys.json)
-      VAULT_UNSEAL_KEY2=$(jq -r '.unseal_keys_b64[1]' /tmp/recovery-keys.json)
-      VAULT_UNSEAL_KEY3=$(jq -r '.unseal_keys_b64[2]' /tmp/recovery-keys.json)
+        # We will need 3/5 keys to unseal each Vault instance
+        VAULT_UNSEAL_KEY1=$(jq -r '.unseal_keys_b64[0]' /tmp/recovery-keys.json)
+        VAULT_UNSEAL_KEY2=$(jq -r '.unseal_keys_b64[1]' /tmp/recovery-keys.json)
+        VAULT_UNSEAL_KEY3=$(jq -r '.unseal_keys_b64[2]' /tmp/recovery-keys.json)
 
-      vault operator unseal "$VAULT_UNSEAL_KEY1"
-      vault operator unseal "$VAULT_UNSEAL_KEY2"
-      vault operator unseal "$VAULT_UNSEAL_KEY3"
+        vault operator unseal "$VAULT_UNSEAL_KEY1"
+        vault operator unseal "$VAULT_UNSEAL_KEY2"
+        vault operator unseal "$VAULT_UNSEAL_KEY3"
     }
 
     # Unseal vault if vault-recovery-keys secret exists
@@ -67,5 +67,5 @@ data:
     echo "Done!"
 kind: ConfigMap
 metadata:
-  name: post-install-script
+  name: init-script
   namespace: vault-server
