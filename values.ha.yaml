@@ -17,15 +17,6 @@ vault:
   server:
     dataStorage:
       enabled: true
-    # TODO: Move to volumes/volumeMounts; extraVolumes is deprecated
-    extraVolumes:
-      - type: configMap
-        name: post-install-script
-    route:
-      enabled: true
-      host: vault.apps.hub.taco.moe
-      tls:
-        termination: edge
     image:
       repository: "registry.connect.redhat.com/hashicorp/vault"
       tag: "1.11.2-ubi"
@@ -36,5 +27,17 @@ vault:
         enabled: true
     postStart:
       - "/bin/bash"
-      - "-c"
-      - "sleep 10 && cp /vault/userconfig/post-install-script/post-install.sh /tmp && chmod +x /tmp/post-install.sh && /tmp/post-install.sh"
+      - "/tmp/scripts/init.sh"
+    route:
+      enabled: true
+      # !! REPLACE HOST VALUE WITH YOUR VAULT HOSTNAME !!
+      host: vault.apps.hub.taco.moe
+      tls:
+        termination: edge
+    volumes:
+      - name: init-script
+        configMap:
+          name: init-script
+    volumeMounts:
+      - mountPath: /tmp/scripts
+        name: init-script
