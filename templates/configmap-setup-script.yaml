@@ -46,9 +46,7 @@ data:
         echo "Joining $HOSTNAME to raft"
         vault operator raft join "http://${HELM_DEPLOYMENT_NAME}-0.${HELM_DEPLOYMENT_NAME}-internal:8200"
         echo "$HOSTNAME joined to raft!"
-        sleep 30
-        # Exit with error so that pod restarts until vault-recovery-keys secret
-        # is created after vault-server-0 initialization.
+
         echo "Exit code 2: Raft joined, vault-recovery-keys secret not yet present"
         exit 2
     fi
@@ -58,6 +56,9 @@ data:
 
     echo 'Unsealing vault...'
     unseal-vault
+
+    # Sleep for 1 minute to give time for replicas to join the raft
+    sleep 60
 
     echo "Creating vault-recovery-keys secret..."
     oc create secret generic vault-recovery-keys --from-file=/tmp/recovery-keys.json
