@@ -1,3 +1,3 @@
-# Vault Deployment
+# Vault Init
 
-Deploy, initialize, and configure Vault on an OpenShift cluster.
+Deploy and initialize Vault on a Red Hat OpenShift cluster.
