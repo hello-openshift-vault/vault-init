@@ -2,7 +2,7 @@
 
 Deploy and initialize Vault on a Red Hat OpenShift cluster.
 
-This chart extends the official [Vault Helm Chart] to include an init script
+This chart extends the official [Vault Helm Chart]() to include an init script
 which does the following:
 
 - Initialize Vault server
