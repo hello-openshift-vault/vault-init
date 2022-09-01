@@ -5,10 +5,11 @@ data:
 
     set -e
 
-    # TODO: Set these from Helm values.yaml
-    CLUSTER_NAME='vault-server'
-    CONFIGURE_K8S_AUTH='true'
-    HELM_DEPLOYMENT_NAME='vault-server'
+    CLUSTER_NAME={{ .Values.vaultInit.clusterName }}
+    CONFIGURE_K8S_AUTH={{ .Values.vaultInit.configureKubernetesAuth }}
+    HELM_DEPLOYMENT_NAME={{ .Values.vaultInit.helmDeploymentName }}
+
+    [[ -n $PAUSE_INIT ]] && PAUSE_INIT={{ .Values.vaultInit.pauseInit }}
 
     if [[ $PAUSE_INIT == 'true' ]] ; then
         echo "init.sh will not run while PAUSE_INIT is 'true'"

@@ -1,3 +1,24 @@
+vaultInit:
+  # If configureKubernetesAuth is true, clusterName will be used for the auth
+  # engine, secret engine, policy, and role names. If configureKubernetesAuth
+  # is not true, this value is ignored.
+  clusterName: kubernetes
+
+  # Automatically configure Vault with a Kubernetes type auth engine, kv secret
+  # engine, policy, and role.
+  configureKubernetesAuth: true
+
+  # Name of the helm deployment
+  # TODO: Remove this. Should be able to use .Release.Name instead
+  helmDeploymentName: vault-server
+
+  # Do not execute init.sh on pod start. This is useful for debugging the
+  # script. To manually execute init.sh, get a shell in the pod and run:
+  # `export PAUSE_INIT=false && /bin/bash /tmp/scripts/init.sh`
+  pauseInit: false
+
+# Values under vault are passed to the Hashicorp Vault chart.
+# https://github.com/hashicorp/vault-helm
 vault:
   global:
     openshift: true
@@ -15,6 +36,8 @@ vault:
       tag: "1.11.2-ubi"
 
   server:
+    extraEnvironmentVars:
+      PAUSE_INIT: "true"
     dataStorage:
       enabled: true
     image:
