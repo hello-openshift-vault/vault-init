@@ -23,9 +23,9 @@ spec:
   name: vault-config-operator
   source: community-operators
   sourceNamespace: openshift-marketplace
-  startingCSV: vault-config-operator.v0.4.1
+  startingCSV: vault-config-operator.v0.6.3
   config:
     env:
       - name: VAULT_ADDR
-        value: "{{ .Values.vault.server.route.host }} "
+        value: "{{ .Values.vault.server.route.host }}"
 {{ end }}
