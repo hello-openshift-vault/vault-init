@@ -16,4 +16,7 @@ install-ha:
 	    vault-server .
 
 uninstall:
+	helm uninstall \
+	    --namespace vault-server \
+	    vault-server
 	oc delete project vault-server
