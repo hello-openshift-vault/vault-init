@@ -12,8 +12,8 @@ vaultInit:
   # TODO: Remove this. Should be able to use .Release.Name instead
   helmDeploymentName: vault-server
 
-  # Do not execute init.sh on pod start. This is useful for debugging the
-  # script. To manually execute init.sh, get a shell in the pod and run:
+  # Do not execute /tmp/scripts/init.sh on pod start. This is useful for
+  # debugging. To manually execute init.sh, get a shell in the pod and run:
   # `export PAUSE_INIT=false && /bin/bash /tmp/scripts/init.sh`
   pauseInit: false
 
