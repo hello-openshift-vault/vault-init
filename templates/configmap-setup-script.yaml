@@ -7,11 +7,12 @@ data:
 
     CLUSTER_NAME={{ .Values.vaultInit.clusterName }}
     CONFIGURE_K8S_AUTH={{ .Values.vaultInit.configureKubernetesAuth }}
-    CONFIGURE_VCO={{ .Values.vaultInit.configureVCO }}
+    CONFIGURE_VCO={{ .Values.vaultInit.vaultConfigOperator.configureVCO }}
+    HA_MODE={{ .Values.vault.server.ha.enabled }}
     HELM_DEPLOYMENT_NAME={{ .Values.vaultInit.helmDeploymentName }}
-    VCO_NAMESPACE={{ .Values.vaultInit.vcoNamespace }}
+    VCO_NAMESPACE={{ .Values.vaultInit.vaultConfigOperator.vcoNamespace }}
 
-    [[ -n $PAUSE_INIT ]] && PAUSE_INIT={{ .Values.vaultInit.pauseInit }}
+    [[ -z $PAUSE_INIT ]] && PAUSE_INIT={{ .Values.vaultInit.pauseInit }}
 
     if [[ $PAUSE_INIT == 'true' ]] ; then
         echo "init.sh will not run while PAUSE_INIT is 'true'"
@@ -146,8 +147,10 @@ data:
             ttl=60m
     fi
 
-    echo "Sleeping for 1 minute to give time for replicas to join the raft..."
-    sleep 60
+    if [[ $HA_MODE == 'true' ]] ; then
+        echo "Sleeping for 1 minute to give time for replicas to join the raft..."
+        sleep 60
+    fi
 
     echo "Creating vault-recovery-keys secret..."
     oc create secret generic vault-recovery-keys --from-file=/tmp/recovery-keys.json

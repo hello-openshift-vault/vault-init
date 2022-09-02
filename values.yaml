@@ -8,14 +8,6 @@ vaultInit:
   # engine, policy, and role.
   configureKubernetesAuth: true
 
-  # Automatically configure Vault for use with Vault Config Operator. This will
-  # create an auth engine, policy, and role for Vault Config Operator to use.
-  configureVCO: true
-
-  # Install the Vault Config Operator
-  # https://github.com/redhat-cop/vault-config-operator
-  installVCO: true
-
   # Name of the helm deployment
   # TODO: Remove this. Should be able to use .Release.Name instead
   helmDeploymentName: vault-server
@@ -25,10 +17,21 @@ vaultInit:
   # `export PAUSE_INIT=false && /bin/bash /tmp/scripts/init.sh`
   pauseInit: false
 
-  # Namespace the Vault Config Operator is installed in. This value will be
-  # used as the auth engine, policy, and role name in Vault. If configureVCO is
-  # false, this value is ignored.
-  vcoNamespace: vault-config-operator
+  # Values relating to installation and configuration of Vault Config Operator
+  # https://github.com/redhat-cop/vault-config-operator
+  vaultConfigOperator:
+    # Automatically configure Vault for use with Vault Config Operator. This will
+    # create an auth engine, policy, and role for Vault Config Operator to use.
+    configureVCO: true
+
+    # Install the Vault Config Operator
+    installVCO: true
+
+    # Namespace the Vault Config Operator is installed in. This value will be
+    # used as the auth engine, policy, and role name in Vault. If configureVCO is
+    # false, this value is ignored..
+    vcoNamespace: vault-config-operator
+
 
 # Values under vault are passed to the Hashicorp Vault chart.
 # https://github.com/hashicorp/vault-helm
@@ -64,7 +67,7 @@ vault:
     route:
       enabled: true
       # !! REPLACE HOST VALUE WITH YOUR VAULT HOSTNAME !!
-      host: vault.apps.hub.taco.moe
+      host: vault.apps.dev.taco.moe
       tls:
         termination: edge
     volumes:

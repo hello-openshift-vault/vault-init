@@ -1,4 +1,4 @@
-{{ if .Values.vaultInit.installVCO }}
+{{ if .Values.vaultInit.vaultConfigOperator.installVCO }}
 apiVersion: v1
 kind: Namespace
 metadata:
