@@ -7,7 +7,9 @@ data:
 
     CLUSTER_NAME={{ .Values.vaultInit.clusterName }}
     CONFIGURE_K8S_AUTH={{ .Values.vaultInit.configureKubernetesAuth }}
+    CONFIGURE_VCO={{ .Values.vaultInit.configureVCO }}
     HELM_DEPLOYMENT_NAME={{ .Values.vaultInit.helmDeploymentName }}
+    VCO_NAMESPACE={{ .Values.vaultInit.vcoNamespace }}
 
     [[ -n $PAUSE_INIT ]] && PAUSE_INIT={{ .Values.vaultInit.pauseInit }}
 
@@ -101,6 +103,46 @@ data:
             bound_service_account_names="$HELM_DEPLOYMENT_NAME" \
             bound_service_account_namespaces="$HELM_DEPLOYMENT_NAME" \
             policies="${CLUSTER_NAME}-read" \
+            ttl=60m
+    fi
+
+    if [[ $CONFIGURE_VCO == 'true' ]] ; then
+        ROOT_TOKEN=$(jq -r '.root_token' /tmp/recovery-keys.json)
+
+        echo "Logging into Vault..."
+        vault login - <<< "$ROOT_TOKEN"
+
+        echo "Enabling $VCO_NAMESPACE Kubernetes auth engine..."
+        vault auth enable -path="$VCO_NAMESPACE" kubernetes
+
+        echo "Configuring $VCO_NAMESPACE Kubernetes auth engine..."
+        vault write "auth/${VCO_NAMESPACE}/config" \
+            token_reviewer_jwt="$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)" \
+            kubernetes_host="https://$KUBERNETES_PORT_443_TCP_ADDR:443" \
+            kubernetes_ca_cert="@/var/run/secrets/kubernetes.io/serviceaccount/ca.crt"
+
+        echo "Gettting $VCO_NAMESPACE auth engine accessor..."
+        MOUNT_ACCESSOR=$(vault auth list -format=json | jq -r ".\"$VCO_NAMESPACE/\".accessor")
+
+        # Indenting here is important
+        # TODO: Review policy rules and see if it really needs all these perms
+        echo "Writing $VCO_NAMESPACE policy..."
+        vault policy write "$VCO_NAMESPACE" - << EOF
+    path "*" {
+        capabilities = ["sudo", "create", "read", "update", "delete", "list"]
+    }
+
+    path "sys/*" {
+        capabilities = ["sudo", "create", "read", "update", "delete", "list"]
+    }
+    EOF
+
+        echo "Creating $VCO_NAMESPACE role..."
+        vault write \
+            "auth/${VCO_NAMESPACE}/role/admin" \
+            bound_service_account_names="vault-server" \
+            bound_service_account_namespaces="vault-server" \
+            policies="$VCO_NAMESPACE" \
             ttl=60m
     fi
 
