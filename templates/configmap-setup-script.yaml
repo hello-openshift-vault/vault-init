@@ -90,7 +90,7 @@ data:
         # Indenting here is important
         echo "Writing $CLUSTER_NAME-read policy..."
         vault policy write "$CLUSTER_NAME-read" - << EOF
-    path "hub/data/{{ "{{" }}identity.entity.aliases.$MOUNT_ACCESSOR.metadata.service_account_namespace{{ "}}" }}/*" {
+    path "${CLUSTER_NAME}/data/{{ "{{" }}identity.entity.aliases.${MOUNT_ACCESSOR}.metadata.service_account_namespace{{ "}}" }}/*" {
         capabilities=["read","list"]
     }
     EOF
