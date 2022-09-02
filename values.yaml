@@ -20,18 +20,17 @@ vaultInit:
   # Values relating to installation and configuration of Vault Config Operator
   # https://github.com/redhat-cop/vault-config-operator
   vaultConfigOperator:
-    # Automatically configure Vault for use with Vault Config Operator. This will
-    # create an auth engine, policy, and role for Vault Config Operator to use.
+    # Automatically configure Vault with an admin account to use with Vault
+    # Config Operator. This will create an auth engine, policy, and role for
+    # Vault Config Operator to use.
     configureVCO: true
 
     # Install the Vault Config Operator
     installVCO: true
 
-    # Namespace the Vault Config Operator is installed in. This value will be
-    # used as the auth engine, policy, and role name in Vault. If configureVCO is
-    # false, this value is ignored..
-    vcoNamespace: vault-config-operator
-
+    # name will be used as the auth engine, policy, and role name in
+    # Vault. If configureVCO is false, this value is ignored.
+    name: vault-config-operator
 
 # Values under vault are passed to the Hashicorp Vault chart.
 # https://github.com/hashicorp/vault-helm

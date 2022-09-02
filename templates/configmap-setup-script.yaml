@@ -10,7 +10,7 @@ data:
     CONFIGURE_VCO={{ .Values.vaultInit.vaultConfigOperator.configureVCO }}
     HA_MODE={{ .Values.vault.server.ha.enabled }}
     HELM_DEPLOYMENT_NAME={{ .Values.vaultInit.helmDeploymentName }}
-    VCO_NAMESPACE={{ .Values.vaultInit.vaultConfigOperator.vcoNamespace }}
+    VCO_NAME={{ .Values.vaultInit.vaultConfigOperator.name }}
 
     [[ -z $PAUSE_INIT ]] && PAUSE_INIT={{ .Values.vaultInit.pauseInit }}
 
@@ -117,25 +117,25 @@ data:
         echo "Logging into Vault..."
         vault login - <<< "$ROOT_TOKEN"
 
-        echo "Enabling $VCO_NAMESPACE Kubernetes auth engine..."
+        echo "Enabling $VCO_NAME Kubernetes auth engine..."
         vault auth enable \
             -description="Auth engine used by Vault Config Operator (Created by vault-init script)" \
-            -path="$VCO_NAMESPACE" \
+            -path="$VCO_NAME" \
             kubernetes
 
-        echo "Configuring $VCO_NAMESPACE Kubernetes auth engine..."
-        vault write "auth/${VCO_NAMESPACE}/config" \
+        echo "Configuring $VCO_NAME Kubernetes auth engine..."
+        vault write "auth/${VCO_NAME}/config" \
             token_reviewer_jwt="$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)" \
             kubernetes_host="https://$KUBERNETES_PORT_443_TCP_ADDR:443" \
             kubernetes_ca_cert="@/var/run/secrets/kubernetes.io/serviceaccount/ca.crt"
 
-        echo "Gettting $VCO_NAMESPACE auth engine accessor..."
-        MOUNT_ACCESSOR=$(vault auth list -format=json | jq -r ".\"$VCO_NAMESPACE/\".accessor")
+        echo "Gettting $VCO_NAME auth engine accessor..."
+        MOUNT_ACCESSOR=$(vault auth list -format=json | jq -r ".\"$VCO_NAME/\".accessor")
 
         # Indenting here is important
         # TODO: Review policy rules and see if it really needs all these perms
-        echo "Writing $VCO_NAMESPACE policy..."
-        vault policy write "$VCO_NAMESPACE" - << EOF
+        echo "Writing $VCO_NAME policy..."
+        vault policy write "$VCO_NAME" - << EOF
     # Policy used by Vault Config Operator to create/modify Vault resources (Created by vault-init script)
     path "*" {
         capabilities = ["sudo", "create", "read", "update", "delete", "list"]
@@ -146,12 +146,12 @@ data:
     }
     EOF
 
-        echo "Creating $VCO_NAMESPACE role..."
+        echo "Creating $VCO_NAME role..."
         vault write \
-            "auth/${VCO_NAMESPACE}/role/admin" \
+            "auth/${VCO_NAME}/role/admin" \
             bound_service_account_names="vault-server" \
             bound_service_account_namespaces="vault-server" \
-            policies="$VCO_NAMESPACE" \
+            policies="$VCO_NAME" \
             ttl=60m
     fi
 
