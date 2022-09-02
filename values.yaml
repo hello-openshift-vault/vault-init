@@ -12,6 +12,10 @@ vaultInit:
   # create an auth engine, policy, and role for Vault Config Operator to use.
   configureVCO: true
 
+  # Install the Vault Config Operator
+  # https://github.com/redhat-cop/vault-config-operator
+  installVCO: true
+
   # Name of the helm deployment
   # TODO: Remove this. Should be able to use .Release.Name instead
   helmDeploymentName: vault-server
@@ -45,8 +49,8 @@ vault:
       tag: "1.11.2-ubi"
 
   server:
-    extraEnvironmentVars:
-      PAUSE_INIT: "true"
+    # extraEnvironmentVars:
+    #   PAUSE_INIT: "true"
     dataStorage:
       enabled: true
     image:
@@ -60,7 +64,7 @@ vault:
     route:
       enabled: true
       # !! REPLACE HOST VALUE WITH YOUR VAULT HOSTNAME !!
-      host: vault.apps.dev.sandbox1068.opentlc.com
+      host: vault.apps.hub.taco.moe
       tls:
         termination: edge
     volumes:
