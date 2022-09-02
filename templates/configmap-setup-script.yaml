@@ -76,7 +76,10 @@ data:
         vault login - <<< "$ROOT_TOKEN"
 
         echo "Enabling $CLUSTER_NAME Kubernetes auth engine..."
-        vault auth enable -path="$CLUSTER_NAME" kubernetes
+        vault auth enable \
+            -description="Local cluster k8s auth created by vault-init script" \
+            -path="$CLUSTER_NAME" \
+            kubernetes
 
         echo "Configuring $CLUSTER_NAME Kubernetes auth engine..."
         vault write "auth/$CLUSTER_NAME/config" \
@@ -90,6 +93,7 @@ data:
         # Indenting here is important
         echo "Writing $CLUSTER_NAME-read policy..."
         vault policy write "$CLUSTER_NAME-read" - << EOF
+    # Grant k8s namespaces the ability to view secrets under "/${CLUSTER_NAME}/data/<NAMESPACE>/*"
     path "${CLUSTER_NAME}/data/{{ "{{" }}identity.entity.aliases.${MOUNT_ACCESSOR}.metadata.service_account_namespace{{ "}}" }}/*" {
         capabilities=["read","list"]
     }
@@ -114,7 +118,10 @@ data:
         vault login - <<< "$ROOT_TOKEN"
 
         echo "Enabling $VCO_NAMESPACE Kubernetes auth engine..."
-        vault auth enable -path="$VCO_NAMESPACE" kubernetes
+        vault auth enable \
+            -description="Auth engine used by Vault Config Operator (Created by vault-init script)" \
+            -path="$VCO_NAMESPACE" \
+            kubernetes
 
         echo "Configuring $VCO_NAMESPACE Kubernetes auth engine..."
         vault write "auth/${VCO_NAMESPACE}/config" \
@@ -129,6 +136,7 @@ data:
         # TODO: Review policy rules and see if it really needs all these perms
         echo "Writing $VCO_NAMESPACE policy..."
         vault policy write "$VCO_NAMESPACE" - << EOF
+    # Policy used by Vault Config Operator to create/modify Vault resources (Created by vault-init script)
     path "*" {
         capabilities = ["sudo", "create", "read", "update", "delete", "list"]
     }
