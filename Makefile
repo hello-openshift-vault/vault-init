@@ -1,4 +1,4 @@
-.PHONY: install uninstall
+.PHONY: install install-ha uninstall
 
 install:
 	helm dependency update
@@ -12,7 +12,8 @@ install-ha:
 	helm install \
 	    --create-namespace \
 	    --namespace vault-server \
-	    --values values.ha.yaml \
+	    --values values.yaml \
+	    --values vaules.ha.yaml \
 	    vault-server .
 
 uninstall:
