@@ -12,26 +12,27 @@ which does the following:
 
 ## Deploying
 
-:warning: You may see *PostStartHookError* after installing. This should fix
-itself once all of the pods are ready. If it persists for more than 1 minute,
-you likely have an actual problem.
-
-### Single Instance
+To deploy a standalone Vault server (1 replica), clone this repo and run:
 
 ```bash
+# Replace VAULT_SERVER_HOSTNAME with the hostname Vault should be deployed to
+export VAULT_SERVER_HOSTNAME="vault.apps.change-me.com"
 make install
 ```
 
-### Highly Available
+To deploy a highly-available Vault server (3 replicas), clone this repo and
+run:
 
 ```bash
+# Replace VAULT_SERVER_HOSTNAME with the hostname Vault should be deployed to
+export VAULT_SERVER_HOSTNAME="vault.apps.change-me.com"
 make install-ha
 ```
 
-## Uninstall
+## Troubleshooting
 
-```bash
-make uninstall
-```
+:warning: You may see *PostStartHookError* events after installing. This should
+fix itself once all of the pods are ready. If the errors persist for more than
+1 minute, you likely have an actual problem.
 
 [Vault Helm Chart]: https://github.com/hashicorp/vault-helm

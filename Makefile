@@ -1,10 +1,15 @@
 .PHONY: install install-ha uninstall
 
+ifndef VAULT_SERVER_HOSTNAME
+$(error VAULT_SERVER_HOSTNAME is not set. This should be the Vault server hostname.)
+endif
+
 install:
 	helm dependency update
 	helm install \
 	    --create-namespace \
 	    --namespace vault-server \
+	    --set vault.server.route.host="${VAULT_SERVER_HOSTNAME}" \
 	    vault-server .
 
 install-ha:
@@ -14,6 +19,7 @@ install-ha:
 	    --namespace vault-server \
 	    --values values.yaml \
 	    --values vaules.ha.yaml \
+	    --set vault.server.route.host="${VAULT_SERVER_HOSTNAME}" \
 	    vault-server .
 
 uninstall:

@@ -66,8 +66,8 @@ vault:
       - "/tmp/scripts/init.sh"
     route:
       enabled: true
-      # !! REPLACE HOST VALUE WITH YOUR VAULT HOSTNAME !!
-      host: vault.apps.dev.taco.moe
+      # This will be injected from the VAULT_SERVER_HOSTNAME env variable
+      # host: ...
       tls:
         termination: edge
     volumes:
