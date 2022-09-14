@@ -18,7 +18,7 @@ install-ha:
 	    --create-namespace \
 	    --namespace vault-server \
 	    --values values.yaml \
-	    --values vaules.ha.yaml \
+	    --values values.ha.yaml \
 	    --set vault.server.route.host="${VAULT_SERVER_HOSTNAME}" \
 	    vault-server .
 
