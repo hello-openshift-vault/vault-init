@@ -13,20 +13,21 @@ vaultInit:
   helmDeploymentName: vault-server
 
   # Do not execute /tmp/scripts/init.sh on pod start. This is useful for
-  # debugging. To manually execute init.sh, get a shell in the pod and run:
-  # `export PAUSE_INIT=false && /bin/bash /tmp/scripts/init.sh`
+  # debugging the init script. To manually execute init.sh, get a shell in the
+  # pod and run: `export PAUSE_INIT=false && /bin/bash /tmp/scripts/init.sh`
   pauseInit: false
 
   # Values relating to installation and configuration of Vault Config Operator
   # https://github.com/redhat-cop/vault-config-operator
   vaultConfigOperator:
+
     # Automatically configure Vault with an admin account to use with Vault
     # Config Operator. This will create an auth engine, policy, and role for
     # Vault Config Operator to use.
-    configureVCO: true
+    configureVCO: false
 
     # Install the Vault Config Operator
-    installVCO: true
+    installVCO: false
 
     # name will be used as the auth engine, policy, and role name in
     # Vault. If configureVCO is false, this value is ignored.
