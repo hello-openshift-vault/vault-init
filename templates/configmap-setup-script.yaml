@@ -55,7 +55,7 @@ data:
     fi
 
     if [[ "$HOSTNAME" != "${HELM_DEPLOYMENT_NAME}-0" ]] ; then
-        echo "Joining $HOSTNAME to raft"
+        echo "Joining $HOSTNAME to raft..."
         vault operator raft join "http://${HELM_DEPLOYMENT_NAME}-0.${HELM_DEPLOYMENT_NAME}-internal:8200"
         echo "$HOSTNAME joined to raft!"
 
@@ -63,6 +63,7 @@ data:
         exit 2
     fi
 
+    # Everything beyond this point is only executed on the first run against the vault-sever-0 pod
     echo 'Initializing vault...'
     vault operator init -format=json > /tmp/recovery-keys.json
 
