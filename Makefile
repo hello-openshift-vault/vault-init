@@ -1,7 +1,7 @@
 .PHONY: install install-ha uninstall
 
 ifndef VAULT_SERVER_HOSTNAME
-$(error VAULT_SERVER_HOSTNAME is not set. This should be the Vault server hostname.)
+$(error VAULT_SERVER_HOSTNAME is not set. Set with 'export VAULT_SERVER_HOSTNAME="vault.apps.cluster.domain"')
 endif
 
 install:
