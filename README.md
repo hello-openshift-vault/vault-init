@@ -6,9 +6,15 @@ This chart extends the official [Vault Helm Chart] to include an init script
 which does the following:
 
 - Initialize Vault server
-- Saves recovery keys and root key to k8s secret
-- Auto join Vault server replicas with Raft
-- Auto unseals all Vault server pods using the k8s secret on pod startup
+- Save recovery keys and root key to k8s secret
+- Unseal Vault server pods using the k8s secret on pod startup
+- Configure Kubernetes auth engine for the local cluster
+- Add a policy that allows k8s namespaces to only access secrets prefixed with
+  the namespace name
+
+For HA deployments only:
+
+- Join Vault server replicas with Raft
 
 ## Deploying
 
